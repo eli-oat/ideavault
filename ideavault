@@ -1,0 +1,83 @@
+#!/bin/bash          
+
+# Loads the dispatch library
+. "helpers/dispatch.sh"
+
+# Version number
+VERSION='1.0.0'
+
+# Config database location
+DATABASE='/path/to/your/ideavault.tsv'
+
+# Color and type-setting utilities 
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[0;33m'
+NO_COLOR='\033[0m'
+CLEAR_LINE='\r\033[K'
+TAB="$(echo $'\t')"
+DATE="$(date)"
+
+# Error handling
+ideavault_call_ () ( echo "  Sorry, '$@' is not a valid command." )
+ideavault_      () ( echo "  Whoops! No command provided." )
+
+# Options
+ideavault_option_version    () ( echo "  Version: $VERSION" )
+ideavault_option_help       () 
+{
+	printf "\n"
+	printf "  ᕙ(⇀‸↼‶)ᕗ\n"
+	printf "  Idea Vault, forget fewer things.\n\n"
+	printf "       idea         Save an idea\n"
+	printf "       remember     List all ideas\n"	
+    printf "       forget       Delete last idea\n"
+    printf "\n"	
+	printf "       --help       Show this message\n"
+	printf "       --version    Version number\n"
+    printf "\n"
+}
+
+# Commands 
+ideavault_command_idea () 
+{
+	# Collect idea
+	printf "${CLEAR_LINE}${GREEN}  What's your big idea?${NO_COLOR}\n\n"
+	printf "  "
+	read IDEA
+	printf "${CLEAR_LINE}\n"
+
+	# Save idea to database
+	COMBINE=$DATE$TAB$IDEA
+	echo "$COMBINE" >> $DATABASE
+}
+
+ideavault_command_remember ()
+{
+	cat $DATABASE
+	printf "  \n"
+}
+
+ideavault_command_forget ()
+{
+	sed -i '' -e '$ d' $DATABASE
+	printf "  Idea forgotten\n\n"
+}
+
+ideavault_command_search ()
+{
+	printf "  Search...\n\n"
+	printf "  "
+	read SEARCHTERM
+	printf "  \n"
+	grep -w -i --color "$SEARCHTERM" $DATABASE
+	printf "  \n"
+}
+
+# Dispatch the arguments
+dispatch ideavault "$@"
+
+#################### 
+# JSON support coming soon
+# echo "{ \"date\": \"$DATE\", \"idea\": \"$IDEA\" },"
+####################
